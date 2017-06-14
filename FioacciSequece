@@ -1,0 +1,38 @@
+package test;
+
+import java.math.BigInteger;
+import java.util.Scanner;
+
+/**
+ * @author sc
+ * @mail 563965131@qq.com
+ * @date 2017年6月11日
+ */
+public class FioacciSequece {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		System.out.println("请输入您要得到的项数:");
+		int n = new Scanner(System.in).nextInt();
+		System.out.println(testFb(n));
+	}
+	
+	static BigInteger testFb(int n){
+		if (n == 0){
+			return new BigInteger("0");
+		}
+		if (n == 1){
+			return new BigInteger("1");
+		}
+		BigInteger n1 = new BigInteger("0");
+		BigInteger n2 = new BigInteger("1");
+		BigInteger sn = new BigInteger("0");
+
+	    for (int i = 0; i < n - 1; i++){
+	    	sn = n1.add(n2);
+	        n1 = n2;
+	    	n2 = sn;
+	    }
+	    return sn;
+	}
+}
