@@ -1,0 +1,245 @@
+package diffFile;
+//按条件得到两个目录下的文件和目录结果；
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * @author sc
+ * @mail 563965131@qq.com
+ * @date 2017年6月15日
+ */
+
+public class DiffFile {
+
+	// 文件夹下目录数目；
+	static int m = 0;
+	// 文件夹下文件数目；
+	static int n = 0;
+	// 相同目录书目；
+	static int p = 0;
+	// 相同文件数目；
+	static int q = 0;
+	// 文件和目录相同数目；
+	static int r = 0;
+	// 同级相同文件数目；
+	static int s = 0;
+	// 相同文件夹集合；
+	static String sbA = "";
+	// 相同文件集合；
+	static String sbB = "";
+	// 目录和文件相同集合；
+	static String sbC = "";
+	// 同级相同文件集合；
+	static String sbD = "";
+
+	public static void main(String[] args) throws IOException {
+		File file1 = new File("D:/file compare/A");
+		File file2 = new File("D:/file compare/B");
+
+		int a = dirCount(file1);
+		int b = fileCount(file1);
+		int c = dirCount(file2);
+		int d = fileCount(file2);
+		System.out.println("A目录文件夹数：" + a);
+		System.out.println("A目录文件数：" + b);
+		System.out.println("B目录文件夹数：" + c);
+		System.out.println("B目录文件数：" + d);
+
+		Map<String, Integer> map1 = dirDiff(file1, file2);
+		for (String key : map1.keySet()) {
+			System.out.println("相同目录：" + key + "相同目录个数： " + map1.get(key));
+		}
+		Map<String, Integer> map2 = fileDiff(file1, file2);
+		for (String key : map2.keySet()) {
+			System.out.println("相同文件：" + key + "相同文件个数： " + map2.get(key));
+		}
+		Map<String, Integer> map3 = fileDirDiff(file1, file2);
+		for (String key : map3.keySet()) {
+			System.out.println("目录和文件相同：" + key + "相同个数： " + map3.get(key));
+		}
+		Map<String, Integer> map4 = dirSameDiff(file1, file2);
+		for (String key : map4.keySet()) {
+			System.out.println("同级相同文件：" + key + "相同个数： " + map4.get(key));
+		}
+	}
+
+	/**
+	 * 定义目录相同函数，返回目录相同的名称集合和数目；
+	 */
+	static Map<String, Integer> dirDiff(File dirA, File dirB) {
+		Map<String, Integer> map = new HashMap<String, Integer>();
+		if (dirA.isDirectory() && dirB.isDirectory()) {
+			File[] fdA = dirA.listFiles();
+			File[] fdB = dirB.listFiles();
+			for (File fA : fdA) {
+				for (File fB : fdB) {
+					if (fA.isDirectory() && fB.isDirectory()) {
+						if (fA.getName().equals(fB.getName())) {
+							sbA = sbA + fA.getName() + "\n";
+							p++;
+						}
+					}
+					dirDiff(fA, fB);
+				}
+			}
+		}
+		map.put(sbA, p);
+		return map;
+	}
+
+	/**
+	 * 定义文件相同函数，返回文件相同的名称集合和数目；
+	 */
+	static Map<String, Integer> fileDiff(File dirA, File dirB) throws IOException {
+		Map<String, Integer> map = new HashMap<String, Integer>();
+		if (dirA.isDirectory() && dirB.isDirectory()) {
+			File[] fdA = dirA.listFiles();
+			File[] fdB = dirB.listFiles();
+			for (File fA : fdA) {
+				for (File fB : fdB) {
+					if (fA.isFile() && fB.isFile()) {
+						if ((fA.getName().equals(fB.getName())) && (fA.length() == fB.length()) && fileContentDiff(fA, fB)) {
+							sbB = sbB + fA.getName() + "\n";
+							q++;
+						}
+					}
+					fileDiff(fA, fB);
+				}
+			}
+		}
+		map.put(sbB, q);
+		return map;
+	}
+
+	/**
+	 * 定义判断文件内容是否相同函数；
+	 */
+	static boolean fileContentDiff(File file3, File file4) throws IOException {
+
+		FileReader fr1 = new FileReader(file3);
+		FileReader fr2 = new FileReader(file4);
+		Boolean bl = false;
+		BufferedReader br1 = new BufferedReader(fr1);
+		BufferedReader br2 = new BufferedReader(fr2);
+		String s1 = "";
+		String s2 = "";
+
+		while ((s1 = br1.readLine()) != null) {
+			while ((s2 = br2.readLine()) != null) {
+				if (s1.equals(s2)) {
+					bl = true;
+				} else {
+					bl = false;
+				}
+			}
+		}
+		return bl;
+	}
+
+	/**
+	 * 定义文件和目录相同函数，返回相同的名称集合和数目；
+	 */
+	static Map<String, Integer> fileDirDiff(File dirA, File dirB) throws IOException {
+		Map<String, Integer> map = new HashMap<String, Integer>();
+		if (dirA.isDirectory() && dirB.isDirectory()) {
+			File[] fdA = dirA.listFiles();
+			File[] fdB = dirB.listFiles();
+			for (File fA : fdA) {
+				for (File fB : fdB) {
+					if ((fA.isFile() && fB.isDirectory()) || (fA.isDirectory() && fB.isFile())) {
+						if ((fA.getName().equals(fB.getName()))) {
+							sbC = sbC + fA.getName() + "\n";
+							r++;
+						}
+					}
+					fileDirDiff(fA, fB);
+				}
+			}
+		}
+		map.put(sbC, r);
+		return map;
+	}
+
+	/**
+	 * 定义同级文件相同函数，返回相同同级文件的名称集合和数目；
+	 */
+	static Map<String, Integer> dirSameDiff(File dirA, File dirB) throws IOException {
+		Map<String, Integer> map = new HashMap<String, Integer>();
+		if (dirA.isDirectory() && dirB.isDirectory()) {
+			File[] fdA = dirA.listFiles();
+			File[] fdB = dirB.listFiles();
+			for (File fA : fdA) {
+				for (File fB : fdB) {
+					if (fA.isFile() && fB.isFile()) {
+						if ((fA.getName().equals(fB.getName())) && (pathNum(fA) == pathNum(fB))) {
+							sbD = sbD + fA.getName() + "\n";
+							s++;
+						}
+					}
+					fileDiff(fA, fB);
+				}
+			}
+		}
+		map.put(sbD, s);
+		return map;
+	}
+
+	/**
+	 * 定义计算文件深度函数，返回文件目录的深度；
+	 */
+	static int pathNum(File file) {
+		String filePath = file.getAbsolutePath();
+		int k = 0;
+		char[] pathArray = filePath.toCharArray();
+		for (int i = 0; i < pathArray.length; i++) {
+			if (pathArray[i] == '\\') {
+				k++;
+			}
+		}
+		return k;
+	}
+
+	/**
+	 * 定义计算目录下文件夹数目函数；
+	 */
+	static int dirCount(File file) {
+		if (file.isDirectory()) {
+			File[] fd = file.listFiles();
+			if (fd != null) {
+				for (File f : fd) {
+					if (f.isDirectory()) {
+						m++;
+						dirCount(f);
+					}
+				}
+			}
+		}
+		return m;
+	}
+
+	/**
+	 * 定义计算目录下文件数目函数；
+	 */
+	static int fileCount(File file) {
+		if (file.isDirectory()) {
+			File[] fd = file.listFiles();
+			if (fd != null) {
+				for (File f : fd) {
+					if (f.isDirectory()) {
+						fileCount(f);
+					}
+				}
+			}
+			for (int i = 0; i < fd.length; i++) {
+				if (fd[i].isFile()) {
+					n++;
+				}
+			}
+		}
+		return n;
+	}
+}

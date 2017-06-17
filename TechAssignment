@@ -1,0 +1,80 @@
+package myTest;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+public class NewAssignTest {
+	public static void main(String[] args) {
+		String[] courseArr = { "VirtualBox", "Vagrant", "WebSocket", "JSONP", "Redis", "MongoDB", "Cassandra", "RabbitMQ", "ActiveMQ",
+				"Kafka", "Lucene", "Solr", "ElasticSearch", "Hadoop", "HDFS", "HIVE", "PIG", "Mahout", "HBase", "Spark", "Guava",
+				"Protobuf", "Avro", "Thrift", "Motan", "Docker", "DynamoDB", "Scala", "Groovy", "SpringBoot" };
+		// 所有课程
+		List<String> tecAllList = new ArrayList<String>(toList(courseArr));
+		// 自主选择的[学员-课程List]Map
+		Map<String, List<String>> stuTecMap = new HashMap<String, List<String>>();
+
+		stuTecMap.put("student1", toList("Redis", "SpringBoot"));
+		stuTecMap.put("student2", toList("Hadoop", "HDFS"));
+		stuTecMap.put("student3", toList("Docker", "Kafka"));
+		stuTecMap.put("student4", toList("Lucene", "Solr"));
+		stuTecMap.put("student5", toList("Solr", "Redis"));
+		stuTecMap.put("student6", toList("ActiveMQ", "Hadoop"));
+		stuTecMap.put("student7", toList("SpringBoot", "ActiveMQ"));
+		stuTecMap.put("student8", toList("Docker", "Lucene"));
+		stuTecMap.put("student9", toList("Redis", "SpringBoot"));
+		stuTecMap.put("student10", toList("SpringBoot", "MongoDB"));
+		stuTecMap.put("student11", toList("SpringBoot", "Spark"));
+		stuTecMap.put("student12", toList("WebSocket", "RabbitMQ"));
+
+		Map<String, List<String>> tecStuMap = new HashMap<String, List<String>>();
+		stuTecMap.forEach((stu, teclist) -> {
+			teclist.forEach((tec) -> {
+				if (tecStuMap.containsKey(tec)) {
+					tecStuMap.get(tec).add(stu);
+				} else {
+					tecStuMap.put(tec, toList(stu));
+				}
+			});
+
+		});
+		tecStuMap.forEach((tec, stuList) -> {
+			if (stuList.size() > 1) {
+				int random = new Random().nextInt(stuList.size());
+				stuList.remove(random);
+				stuList.forEach(stu -> {
+					stuTecMap.get(stu).remove(tec);
+				});
+
+			}
+		});
+
+		tecAllList.removeAll(tecStuMap.keySet());
+		stuTecMap.forEach((stu, tecList) -> {
+
+			for (int i = tecList.size(); i < 2; i++) {
+				int random = new Random().nextInt(tecAllList.size());
+				tecList.add(tecAllList.get(random));
+			}
+
+		});
+
+		stuTecMap.forEach((k, v) -> {
+			System.out.println("\n"+k + ":");
+			v.forEach((str) -> {
+				System.out.print(str + ",");
+			});
+		});
+	}
+
+	public static List<String> toList(String... args) {
+		List<String> list = new ArrayList<String>();
+		for (String str : args) {
+			list.add(str);
+		}
+		return list;
+	}
+
+}
